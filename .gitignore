@@ -1,0 +1,38 @@
+# Python environments and generated files
+.venv/
+venv/
+__pycache__/
+*.py[cod]
+*.egg-info/
+build/
+dist/
+
+# Temporary local toolchain/dependency installs used for development
+.run-deps/
+.build-check/
+
+# Native build outputs
+*.o
+*.obj
+*.pyd
+*.so
+*.dll
+*.dylib
+*.lib
+*.exp
+
+# Optional trained evaluator checkpoints
+weights.bin
+*.pt
+*.pth
+
+# Local secrets and settings
+.env
+.env.*
+!.env.example
+
+# Editor/OS metadata
+.idea/
+.vscode/
+Thumbs.db
+.DS_Store

@@ -1,0 +1,111 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="theme-color" content="#111713">
+  <meta name="description" content="A local chess engine demonstration with a C move generator, C++ search, and Python API.">
+  <title>Bitboard — Chess Engine Lab</title>
+  <script src="https://unpkg.com/react@18.3.1/umd/react.production.min.js" crossorigin="anonymous"></script>
+  <script src="https://unpkg.com/react-dom@18.3.1/umd/react-dom.production.min.js" crossorigin="anonymous"></script>
+  <script src="https://unpkg.com/@babel/standalone@7.26.10/babel.min.js" crossorigin="anonymous"></script>
+  <style>
+    :root{color-scheme:dark;--page:#111713;--panel:#1a211c;--panel2:#202922;--line:#303b33;--muted:#a5b0a7;--text:#f3f5ef;--lime:#c8f169;--green:#415f49;--cream:#f0ead8;--ink:#172019;--danger:#ffb4a9}
+    *{box-sizing:border-box}body{margin:0;background:radial-gradient(ellipse at 50% -25%,#29392d 0,transparent 52%),var(--page);color:var(--text);font:15px/1.5 Inter,ui-sans-serif,system-ui,-apple-system,"Segoe UI",sans-serif;min-height:100vh}button,input{font:inherit}button{color:inherit}button:focus-visible,input:focus-visible{outline:3px solid var(--lime);outline-offset:3px}.shell{width:min(1240px,100%);margin:auto;padding:32px 28px 42px}.topbar{display:flex;align-items:center;justify-content:space-between;gap:20px;margin-bottom:28px}.brand{display:flex;align-items:center;gap:13px}.brand-mark{width:44px;height:44px;border-radius:14px;background:var(--lime);color:#182019;display:grid;place-items:center;font-size:25px;font-weight:800;box-shadow:0 8px 26px #c8f16925}.eyebrow{color:var(--lime);font-size:10px;font-weight:800;letter-spacing:.2em;text-transform:uppercase}.brand-title{font-size:16px;font-weight:750;letter-spacing:-.02em}.top-actions{display:flex;align-items:center;gap:11px}.local-badge{color:#d5e5d5;font-size:12px;display:flex;align-items:center;gap:8px;padding:8px 12px;border:1px solid var(--line);border-radius:999px}.pulse{width:7px;height:7px;background:var(--lime);border-radius:50%;box-shadow:0 0 0 4px #c8f16919}.button{border:1px solid var(--line);background:#222c24;border-radius:10px;padding:9px 14px;font-size:13px;font-weight:700;cursor:pointer;transition:background .15s,border-color .15s,transform .15s}.button:hover:not(:disabled){background:#2c392e;border-color:#526451;transform:translateY(-1px)}.button:disabled{opacity:.5;cursor:wait}.button.primary{background:var(--lime);color:#172019;border-color:var(--lime)}.button.primary:hover:not(:disabled){background:#d7ff86}.intro{margin:0 0 24px;display:flex;justify-content:space-between;align-items:end;gap:20px}.intro h1{margin:5px 0 3px;font-size:clamp(25px,3vw,34px);line-height:1.12;letter-spacing:-.045em}.intro p{margin:0;color:var(--muted);font-size:14px}.intro-note{color:#cfdbc9;font-size:12px;text-align:right;max-width:230px}.layout{display:grid;grid-template-columns:minmax(0,1fr) 340px;gap:20px;align-items:start}.board-panel,.card{border:1px solid var(--line);background:linear-gradient(145deg,#1b231d,#171e19);border-radius:16px;box-shadow:0 18px 55px #0002}.board-panel{padding:18px}.player-bar{display:flex;align-items:center;justify-content:space-between;padding:2px 4px 14px}.player{display:flex;align-items:center;gap:10px;min-width:0}.avatar{width:35px;height:35px;border-radius:11px;display:grid;place-items:center;font-size:19px}.avatar.white{background:var(--cream);color:#172019}.avatar.black{background:#303b33;color:#f7f4e9}.player-name{font-size:13px;font-weight:750}.player-sub{color:var(--muted);font-size:11px}.turn-chip{font-size:11px;color:#dce7d9;background:#253129;border:1px solid #35443a;border-radius:999px;padding:6px 10px;white-space:nowrap}.turn-chip strong{color:var(--lime)}.board-wrap{position:relative;padding-left:19px;padding-bottom:18px}.board{display:grid;grid-template-columns:repeat(8,minmax(0,1fr));width:100%;aspect-ratio:1;border-radius:5px;overflow:hidden;box-shadow:0 10px 30px #0003}.sq{position:relative;display:grid;place-items:center;aspect-ratio:1;border:0;padding:0;cursor:pointer;user-select:none}.sq.light{background:var(--cream)}.sq.dark{background:var(--green)}.sq:hover{filter:brightness(1.08)}.sq.selected{box-shadow:inset 0 0 0 4px #d6f56b;z-index:1}.sq.last::after{content:"";position:absolute;inset:0;background:#e6ef5e33;pointer-events:none}.sq.check{box-shadow:inset 0 0 0 5px #e85e50;z-index:2}.piece{position:relative;z-index:1;font-family:"Segoe UI Symbol","Noto Sans Symbols 2","DejaVu Sans",serif;font-size:clamp(25px,6.3vw,68px);line-height:1;filter:drop-shadow(0 2px 1px #0004);transition:transform .12s}.sq:hover .piece{transform:translateY(-2px)}.piece.white-piece{color:#fff;text-shadow:0 1px 2px #182019,1px 0 #182019,-1px 0 #182019,0 -1px #182019}.piece.black-piece{color:#111713;text-shadow:0 1px 1px #fff5}.target{position:absolute;width:23%;height:23%;border-radius:50%;background:#17201958;z-index:0}.target.capture{width:80%;height:80%;background:transparent;border:5px solid #17201955}.coord{position:absolute;z-index:3;font-size:10px;font-weight:800;line-height:1}.coord.rank{left:5px;top:4px}.coord.file{right:5px;bottom:4px}.sq.light .coord{color:var(--green)}.sq.dark .coord{color:#f0ead8}.board-bottom{position:absolute;bottom:0;left:19px;right:0;display:flex;justify-content:space-around;color:#89968b;font-size:10px;font-weight:650}.file-gutter{position:absolute;left:0;top:0;bottom:18px;display:flex;flex-direction:column;justify-content:space-around;color:#89968b;font-size:10px;font-weight:650}.board-footer{display:flex;align-items:center;justify-content:space-between;gap:12px;padding:14px 3px 1px}.game-message{font-size:12px;color:#cad4ca;display:flex;align-items:center;gap:8px}.message-dot{height:7px;width:7px;background:var(--lime);border-radius:50%}.message-dot.busy{animation:blink 1s infinite}@keyframes blink{50%{opacity:.3}}.legal-note{font-size:11px;color:#839087}.sidebar{display:grid;gap:14px}.card{padding:16px}.card-head{display:flex;align-items:center;justify-content:space-between;gap:10px;margin-bottom:13px}.card h2{font-size:13px;letter-spacing:.01em;margin:0;font-weight:750}.status{font-size:10px;text-transform:uppercase;letter-spacing:.08em;font-weight:800;color:#d2e2d0;background:#28382c;padding:5px 8px;border-radius:7px}.status.finished{background:#493c25;color:#f5d78c}.status.check{background:#482c2a;color:#ffb6ad}.evaluation{display:flex;align-items:center;gap:13px;margin:2px 0 14px}.eval-track{height:8px;flex:1;background:#101510;border-radius:999px;overflow:hidden;border:1px solid #364039}.eval-white{height:100%;background:linear-gradient(90deg,#a6bc9d,#e7eadb);border-radius:999px;transition:width .3s}.eval-value{font-variant-numeric:tabular-nums;font-size:13px;font-weight:750;min-width:45px;text-align:right}.metrics{display:grid;grid-template-columns:repeat(3,1fr);gap:8px}.metric{background:#222c24;border:1px solid #2c382e;border-radius:10px;padding:10px 8px}.metric-label{font-size:10px;color:var(--muted);margin-bottom:3px}.metric-value{font-size:14px;font-variant-numeric:tabular-nums;font-weight:750}.best-move{border-top:1px solid var(--line);margin-top:13px;padding-top:11px;display:flex;justify-content:space-between;gap:8px;font-size:11px;color:var(--muted)}.best-move strong{color:var(--lime);font-family:ui-monospace,monospace}.control{margin-top:13px}.control:first-of-type{margin-top:0}.control-label{display:flex;justify-content:space-between;align-items:center;font-size:12px;color:#d1d9d0;margin-bottom:7px}.control-label output{font-size:11px;color:var(--lime);font-variant-numeric:tabular-nums}input[type=range]{display:block;width:100%;accent-color:var(--lime);height:16px}.control-hint{font-size:10px;color:#7f8c81;margin-top:5px}.history{max-height:185px;overflow:auto;scrollbar-color:#48564a transparent;scrollbar-width:thin}.history-table{width:100%;border-collapse:collapse;font-variant-numeric:tabular-nums}.history-table td{padding:6px 4px;border-bottom:1px solid #283229;font-size:12px}.history-table td:first-child{width:34px;color:#78867b}.history-table td:not(:first-child){font-family:ui-monospace,monospace}.empty{color:#819086;font-size:12px;padding:8px 2px}.error{margin-bottom:15px;border:1px solid #70423c;background:#3a2825;color:#ffd0ca;padding:11px 14px;border-radius:11px;font-size:13px}.error button{float:right;border:0;background:none;color:#ffd0ca;cursor:pointer}.promotion-backdrop{position:fixed;inset:0;background:#070b08c9;display:grid;place-items:center;z-index:10;padding:20px}.promotion{background:#1d271f;border:1px solid #475548;border-radius:18px;padding:22px;box-shadow:0 25px 80px #0009}.promotion h2{font-size:16px;margin:0 0 3px}.promotion p{font-size:12px;color:var(--muted);margin:0 0 16px}.promotion-options{display:flex;gap:10px}.promotion-options button{width:62px;height:65px;background:#273329;border:1px solid #3b4b3d;border-radius:12px;cursor:pointer}.promotion-options button:hover{background:#374733;border-color:var(--lime)}.promotion-options .piece{font-size:42px}.footer{margin-top:19px;display:flex;justify-content:space-between;gap:12px;color:#7f8d82;font-size:10px}.footer span:last-child{text-align:right}.sr-only{position:absolute;width:1px;height:1px;padding:0;margin:-1px;overflow:hidden;clip:rect(0,0,0,0);white-space:nowrap;border:0}
+    @media(max-width:850px){.layout{grid-template-columns:minmax(0,1fr) 300px;gap:14px}.shell{padding:24px 16px}.board-panel{padding:12px}.piece{font-size:clamp(24px,6vw,55px)}}
+    @media(max-width:680px){.layout{grid-template-columns:1fr}.sidebar{grid-template-columns:repeat(2,minmax(0,1fr))}.sidebar .card:first-child,.sidebar .card:last-child{grid-column:1/-1}.shell{padding:18px 13px 28px}.topbar{margin-bottom:20px}.intro{align-items:start}.intro-note{display:none}.local-badge{font-size:0;padding:10px}.local-badge .pulse{margin:0}.button{padding:9px 11px}.board-panel{padding:10px}.piece{font-size:clamp(25px,10vw,58px)}}
+    @media(max-width:390px){.sidebar{grid-template-columns:1fr}.sidebar .card{grid-column:1/-1}.brand-title{font-size:14px}.brand-mark{width:39px;height:39px}.top-actions{gap:7px}.legal-note{display:none}}
+    @media(prefers-reduced-motion:reduce){*,*::before,*::after{scroll-behavior:auto!important;animation-duration:.01ms!important;animation-iteration-count:1!important;transition-duration:.01ms!important}}
+  </style>
+  <style>
+    /* Keep the whole board visible on typical 1080p presentation screens. */
+    .board{max-width:680px}
+    .board-bottom{right:auto;width:min(680px,calc(100% - 19px))}
+  </style>
+</head>
+<body>
+  <div id="root"></div>
+  <script type="text/babel">
+    const {useEffect,useMemo,useState}=React;
+    const symbols=['♟','♞','♝','♜','♛','♚','♟','♞','♝','♜','♛','♚'];
+    const pieceNames=['pawn','knight','bishop','rook','queen','king'];
+    async function api(path,options={}){
+      const response=await fetch(path,options);
+      const data=await response.json().catch(()=>({detail:'The server returned an unreadable response.'}));
+      if(!response.ok)throw new Error(data.detail||`Request failed (${response.status})`);
+      return data;
+    }
+    function App(){
+      const [state,setState]=useState(null),[selected,setSelected]=useState(null),[last,setLast]=useState([]),[depth,setDepth]=useState(6),[time,setTime]=useState(1000),[busy,setBusy]=useState(false),[promotion,setPromotion]=useState(null),[error,setError]=useState('');
+      const refresh=async()=>{try{setState(await api('/state'));setError('')}catch(e){setError('Could not connect to the local engine. Start the server, then refresh this page.')}};
+      useEffect(()=>{refresh()},[]);
+      const legal=state?.legal_moves||[];
+      const targets=useMemo(()=>legal.filter(m=>m.source===selected),[legal,selected]);
+      const status=state?.game_status||'CONNECTING';
+      const finished=status.startsWith('CHECKMATE')||status==='STALEMATE'||status==='DRAW_50';
+      const telemetry=state?.ai_telemetry||{};
+      const score=telemetry.score_cp||0;
+      const whiteShare=Math.max(3,Math.min(97,50+Math.max(-1000,Math.min(1000,score))/40));
+      const inCheck=!!state?.in_check;
+      const blackToMove=state?.side_to_move==='black';
+      const statusLabel=({PLAYING:'In progress',STALEMATE:'Stalemate',DRAW_50:'Draw · 50 moves'})[status]||status.replaceAll('_',' ').toLowerCase();
+      async function reset(){setBusy(true);setError('');try{const fresh=await api('/reset',{method:'POST'});setState(fresh);setSelected(null);setLast([])}catch(e){setError(e.message)}finally{setBusy(false)}}
+      async function submit(move,promo='q'){
+        setBusy(true);setError('');
+        try{const next=await api('/move',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({source:move.source,target:move.target,promotion:promo,max_depth:Number(depth),time_limit_ms:Number(time)})});setLast([move.source,move.target]);setState(next);setSelected(null)}
+        catch(e){setError(e.message)}finally{setBusy(false);setPromotion(null)}
+      }
+      function clickSquare(square){
+        if(busy||!state||status!=='PLAYING')return;
+        if(selected!==null&&targets.some(m=>m.target===square)){
+          const choices=targets.filter(m=>m.target===square);
+          if(choices.some(m=>m.promotion)){setPromotion(choices[0]);return}
+          submit(choices[0]);return;
+        }
+        const piece=state.board[square];
+        const isSidePiece=piece>=0&&(blackToMove?piece>=6:piece<6);
+        setSelected(isSidePiece?square:null);
+      }
+      function squareLabel(square,piece){const file=String.fromCharCode(97+square%8),rank=Math.floor(square/8)+1;return `${file}${rank}${piece>=0?`, ${blackToMove&&piece>=6||!blackToMove&&piece<6?'your':'engine'} ${pieceNames[piece%6]}`:''}`}
+      return <main className="shell">
+        <header className="topbar">
+          <div className="brand"><div className="brand-mark" aria-hidden="true">♞</div><div><div className="eyebrow">Chess engine lab</div><div className="brand-title">BITBOARD <span style={{color:'var(--muted)',fontWeight:500}}>· Systems project</span></div></div></div>
+          <div className="top-actions"><span className="local-badge"><i className="pulse" style={{background:state?'var(--lime)':'#ffb4a9'}}/>{state?'Local engine ready':'Waiting for server'}</span><button className="button" onClick={refresh} disabled={busy} aria-label="Refresh game state">Refresh</button><button className="button primary" onClick={reset} disabled={busy}>New game</button></div>
+        </header>
+        <div className="intro"><div><div className="eyebrow">Human vs engine · White to move first</div><h1>A chess engine, built from the board up.</h1><p>Play a game and inspect the search behind every reply.</p></div><div className="intro-note">C bitboards <span style={{color:'var(--lime)'}}>→</span> C++ search <span style={{color:'var(--lime)'}}>→</span> Python API</div></div>
+        {error&&<div className="error" role="alert"><button onClick={()=>setError('')} aria-label="Dismiss error">×</button>{error}</div>}
+        <div className="layout">
+          <section className="board-panel" aria-label="Chess game">
+            <div className="player-bar"><div className="player"><div className="avatar white" aria-hidden="true">♙</div><div><div className="player-name">You <span style={{fontWeight:500,color:'var(--muted)'}}>· White</span></div><div className="player-sub">Human player</div></div></div><span className="turn-chip">{!blackToMove&&status==='PLAYING'?<><strong>Your turn</strong> · White</>:status==='PLAYING'?'Engine to move · Black':finished?'Game complete':'Waiting for engine'}</span></div>
+            <div className="board-wrap"><div className="file-gutter" aria-hidden="true">{[8,7,6,5,4,3,2,1].map(n=><span key={n}>{n}</span>)}</div>
+              <div className="board" role="group" aria-label="Chess board">
+                {Array.from({length:64},(_,index)=>{const row=Math.floor(index/8),file=index%8,rank=7-row,square=rank*8+file,piece=state?.board?.[square]??-1,isTarget=targets.some(m=>m.target===square),capture=isTarget&&piece>=0,isLast=last.includes(square),isKingCheck=inCheck&&piece=== (blackToMove?11:5);return <button key={square} aria-label={squareLabel(square,piece)} aria-pressed={selected===square} onClick={()=>clickSquare(square)} className={`sq ${(row+file)%2?'dark':'light'}${selected===square?' selected':''}${isLast?' last':''}${isKingCheck?' check':''}`}>
+                  {file===0&&<span className="coord rank" aria-hidden="true">{rank+1}</span>}{row===7&&<span className="coord file" aria-hidden="true">{String.fromCharCode(97+file)}</span>}
+                  {piece>=0&&<span aria-hidden="true" className={`piece ${piece<6?'white-piece':'black-piece'}`}>{symbols[piece]}</span>}{isTarget&&<span aria-hidden="true" className={`target${capture?' capture':''}`}/>}</button>})}
+              </div><div className="board-bottom" aria-hidden="true">{'abcdefgh'.split('').map(f=><span key={f}>{f}</span>)}</div>
+            </div>
+            <div className="board-footer"><div className="game-message" aria-live="polite"><span className={`message-dot${busy?' busy':''}`}/>{busy?'Engine is thinking…':inCheck?'Check!':finished?statusLabel:state?'Select a piece, then choose a highlighted square.':'Connecting to local engine…'}</div><div className="legal-note">Legal moves highlighted</div></div>
+          </section>
+          <aside className="sidebar" aria-label="Engine information">
+            <section className="card"><div className="card-head"><h2>Engine analysis</h2><span className={`status${finished?' finished':''}${inCheck?' check':''}`}>{statusLabel}</span></div>
+              <div className="evaluation"><div className="eval-track" role="img" aria-label={`Evaluation bar, ${Math.round(whiteShare)} percent white advantage`}><div className="eval-white" style={{width:`${whiteShare}%`}}/></div><div className="eval-value">{score>0?'+':''}{(score/100).toFixed(2)}</div></div>
+              <div className="metrics"><div className="metric"><div className="metric-label">Search depth</div><div className="metric-value">{telemetry.depth||0}<span style={{fontSize:10,color:'var(--muted)',fontWeight:500}}> ply</span></div></div><div className="metric"><div className="metric-label">Nodes searched</div><div className="metric-value">{(telemetry.nodes||0).toLocaleString()}</div></div><div className="metric"><div className="metric-label">Search speed</div><div className="metric-value">{(telemetry.nps||0).toLocaleString()}<span style={{fontSize:10,color:'var(--muted)',fontWeight:500}}> /s</span></div></div></div>
+              <div className="best-move"><span>Engine response</span><strong>{telemetry.best_move||'—'}</strong></div>
+            </section>
+            <section className="card"><div className="card-head"><h2>Search settings</h2><span className="eyebrow" style={{fontSize:9}}>Next reply</span></div>
+              <div className="control"><label className="control-label" htmlFor="depth"><span>Maximum depth</span><output>{depth} ply</output></label><input id="depth" type="range" min="1" max="12" value={depth} onChange={e=>setDepth(e.target.value)} /><div className="control-hint">How many half-moves the engine explores.</div></div>
+              <div className="control"><label className="control-label" htmlFor="time"><span>Time limit</span><output>{(time/1000).toFixed(1)} s</output></label><input id="time" type="range" min="100" max="5000" step="100" value={time} onChange={e=>setTime(e.target.value)} /><div className="control-hint">Maximum thinking time for each engine move.</div></div>
+            </section>
+            <section className="card"><div className="card-head"><h2>Move history</h2><span className="eyebrow" style={{fontSize:9}}>{Math.ceil((state?.move_history?.length||0)/2)} turns</span></div>
+              <div className="history" aria-live="polite">{state?.move_history?.length?<table className="history-table"><tbody>{Array.from({length:Math.ceil(state.move_history.length/2)},(_,i)=><tr key={i}><td>{i+1}.</td><td>{state.move_history[i*2]}</td><td>{state.move_history[i*2+1]||''}</td></tr>)}</tbody></table>:<div className="empty">Your game notation will appear here.</div>}</div>
+            </section>
+          </aside>
+        </div>
+        <footer className="footer"><span>Local demonstration · C move generation · C++ alpha-beta search · Python API</span><span>Adjust depth and time to explore the search trade-off.</span></footer>
+        {promotion&&<div className="promotion-backdrop" role="dialog" aria-modal="true" aria-labelledby="promotion-title"><div className="promotion"><h2 id="promotion-title">Choose a promotion</h2><p>Your pawn reached the far side of the board.</p><div className="promotion-options">{['q','r','b','n'].map((p,i)=><button key={p} onClick={()=>submit(promotion,p)} aria-label={`Promote to ${['queen','rook','bishop','knight'][i]}`}><span className={`piece ${blackToMove?'black-piece':'white-piece'}`}>{symbols[(blackToMove?6:0)+[4,3,2,1][i]]}</span></button>)}</div></div></div>}
+      </main>;
+    }
+    ReactDOM.createRoot(document.getElementById('root')).render(<App/>);
+  </script>
+</body>
+</html>
